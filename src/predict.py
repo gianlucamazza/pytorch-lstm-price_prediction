@@ -1,7 +1,6 @@
 import argparse
 import os
 import sys
-import time
 from typing import List, Tuple
 
 import numpy as np
@@ -13,8 +12,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.data_loading import load_or_get_historical_data
 from src.model import load_model
-from src.data_loader import preprocess_data, get_data
 from src.logger import setup_logger
 from src.config import load_config
 
@@ -227,22 +226,25 @@ def main(config_path: str) -> None:
     logger.info(f"Loaded configuration from {config_path}")
     logger.info(f"Starting prediction for {config.ticker}")
 
-    historical_data, features = get_historical_data(config)
-    x, y, scaler_features, scaler_prices, scaler_volume, selected_features = (
-        preprocess_data(
-            symbol=config.symbol,
-            data_sampling_interval=config.data_sampling_interval,
-            historical_data=historical_data,
-            targets=config.targets,
-            look_back=config.look_back,
-            look_forward=config.look_forward,
-            features=features,
-            selected_features=config.selected_features,
-        )
-    )
+    historical_data = load_or_get_historical_data(config)
+
+    # load csv file from config.data_settings["historical_data_path"]
+    historical_data = pd.read_csv(config.data_settings["historical_data_path"])
+    logger.info(f"Loaded historical data from {config.data_settings['historical_data_path']}")
+    logger.info(f"Data shape: {historical_data.shape}")
+
+    features = config.data_settings["selected_features"]
+    feature_data = historical_data[features]
+
+    # scale target data
+    scaler_prices = StandardScaler()
+    scaler_volume = MinMaxScaler()
+
+    x = feature_data.values
+    x = scaler_prices.fit_transform(x)
 
     model = load_model(
-        config.symbol, config.model_dir, len(selected_features), config.model_settings
+        config.data_settings["symbol"], config.training_settings["model_dir"], len(features), config.model_settings
     )
     predictions, future_predictions = predict(
         _model=model,
@@ -250,13 +252,13 @@ def main(config_path: str) -> None:
         scaler_prices=scaler_prices,
         scaler_volume=scaler_volume,
         future_days=config.look_forward,
-        _features=selected_features,
+        _features=features,
         _targets=config.targets,
     )
     candles = historical_data[["Open", "High", "Low", "Close"]]
     plot_predictions(
         config.symbol,
-        f"docs/{config.symbol}_{selected_features}_predictions.html",
+        f"docs/{config.symbol}_{features}_predictions.html",
         candles,
         predictions,
         future_predictions,
@@ -272,20 +274,6 @@ def main(config_path: str) -> None:
         config.symbol,
     )
     logger.info(f"Prediction for {config.symbol} completed")
-
-
-def get_historical_data(config) -> Tuple[pd.DataFrame, List[str]]:
-    logger.info(f"Getting data for {config.symbol} from {config.start_date}")
-    return get_data(
-        config.ticker,
-        config.symbol,
-        asset_type=config.asset_type,
-        start=config.start_date,
-        end=time.strftime("%Y-%m-%d"),
-        windows=config.indicator_windows,
-        data_sampling_interval=config.data_sampling_interval,
-        data_resampling_frequency=config.data_resampling_frequency,
-    )
 
 
 def save_predictions_report(

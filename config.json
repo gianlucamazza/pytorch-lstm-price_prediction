@@ -4,10 +4,10 @@
         "symbol": "BTCUSD",
         "historical_data_path": "data/BTCUSD_1d.csv",
         "asset_type": "commodity",
-        "data_sampling_interval": "1d",
         "start_date": "2013-01-01",
+        "data_sampling_interval": "1d",
         "data_resampling_frequency": "D",
-        "technical_indicators": {
+        "technical_indicator_windows": {
             "SMA_50": 50,
             "SMA_200": 200,
             "EMA": 20,
@@ -41,27 +41,32 @@
             "Adj Close"
         ],
         "all_features": [
-            "Open",
-            "High",
-            "Low",
-            "Close",
-            "Adj Close",
-            "Volume",
             "SMA_50",
             "SMA_200",
             "EMA",
             "MACD",
+            "MACD_Signal",
             "RSI",
-            "Bollinger",
-            "ATR",
-            "Stochastic",
-            "Aroon",
-            "Williams_R",
-            "CMF",
+            "Bollinger_High",
+            "Bollinger_Low",
+            "ADX",
             "CCI",
-            "Ichimoku"
+            "CMF",
+            "Ichimoku_Tenkan",
+            "Ichimoku_Kijun",
+            "Ichimoku_Senkou_Span_A",
+            "Ichimoku_Senkou_Span_B"
         ],
-        "selected_features": []
+        "selected_features": [
+            "SMA_50",
+            "SMA_200",
+            "EMA",
+            "Bollinger_High",
+            "Bollinger_Low",
+            "Ichimoku_Tenkan",
+            "Ichimoku_Senkou_Span_A",
+            "Ichimoku_Senkou_Span_B"
+        ]
     },
     "model_settings": {
         "hidden_size": 162,

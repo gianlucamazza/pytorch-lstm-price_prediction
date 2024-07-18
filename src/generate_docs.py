@@ -140,7 +140,8 @@ def extract_features_from_filename(filename):
 
 def generate_index_html():
     # Get a list of all HTML files in the directory
-    files = [f for f in os.listdir(html_directory) if f.endswith("_predictions.html")]
+    files = [f for f in os.listdir(
+        html_directory) if f.endswith("_predictions.html")]
 
     # Generate the list of links and rows
     rows = []

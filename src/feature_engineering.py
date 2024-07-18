@@ -1,5 +1,4 @@
 from typing import List, Tuple
-
 import pandas as pd
 from ta.momentum import RSIIndicator, StochasticOscillator
 from ta.trend import (
@@ -209,7 +208,8 @@ def calculate_technical_indicators(
     pd.DataFrame
         Historical data with calculated technical indicators.
     """
-    logger.info(f"Starting calculation of technical indicators for {asset_type}")
+    logger.info(
+        f"Starting calculation of technical indicators for {asset_type}")
     historical_data.index = pd.to_datetime(historical_data.index)
     historical_data = historical_data.asfreq(frequency)
 
